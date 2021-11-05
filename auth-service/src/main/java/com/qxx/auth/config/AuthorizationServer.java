@@ -10,11 +10,17 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+
+import javax.sql.DataSource;
+import java.util.Arrays;
 
 /**
  * 授权服务器配置类
@@ -30,7 +36,18 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     TokenStore tokenStore;
 
     @Autowired
-    ClientDetailsService clientDetailsService;
+    JwtAccessTokenConverter jwtAccessTokenConverter;
+
+    @Autowired
+    CustomAdditionalInformation customAdditionalInformation;
+
+    @Autowired
+    DataSource dataSource;
+
+    @Bean
+    ClientDetailsService clientDetailsService(){
+        return new JdbcClientDetailsService(dataSource);
+    }
 
     /**
      * 用来配置token的一些基本信息，例如token是否支持刷新、token的存储位置、有效期等
@@ -38,11 +55,12 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     @Bean
     AuthorizationServerTokenServices tokenServices(){
         DefaultTokenServices services = new DefaultTokenServices();
-        services.setClientDetailsService(clientDetailsService);
+        services.setClientDetailsService(clientDetailsService());
         services.setSupportRefreshToken(true);
         services.setTokenStore(tokenStore);
-        services.setAccessTokenValiditySeconds(60 * 60 * 2);
-        services.setRefreshTokenValiditySeconds(60 * 60 * 24 * 3);
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(jwtAccessTokenConverter, customAdditionalInformation));
+        services.setTokenEnhancer(tokenEnhancerChain);
         return services;
     }
 
@@ -65,13 +83,14 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
      */
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory()
-                .withClient("authService")
-                .secret(new BCryptPasswordEncoder().encode("123456"))
-                .resourceIds("auth")
-                .authorizedGrantTypes("authorization_code", "refresh_token")
-                .scopes("all")
-                .redirectUris("http://localhost:8083/index.html");
+//        clients.inMemory()
+//                .withClient("authService")
+//                .secret(new BCryptPasswordEncoder().encode("123456"))
+//                .resourceIds("auth")
+//                .authorizedGrantTypes("authorization_code", "refresh_token")
+//                .scopes("all")
+//                .redirectUris("http://localhost:8083/index.html");
+        clients.withClientDetails(clientDetailsService());
     }
 
     /**
