@@ -22,4 +22,14 @@ public class HelloController {
         return "index";
     }
 
+
+    public static void main(String[] args) {
+        String dsl = "\'hello \'";
+        System.out.println(dsl);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+    }
 }

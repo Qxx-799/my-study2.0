@@ -1,4 +1,4 @@
-server:
+1server:
   port: 8081
 
 spring:

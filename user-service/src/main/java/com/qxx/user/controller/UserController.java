@@ -29,4 +29,6 @@ public class UserController {
         String encode = encoder.encode("123456");
         System.out.println(encode);
     }
+
+
 }
