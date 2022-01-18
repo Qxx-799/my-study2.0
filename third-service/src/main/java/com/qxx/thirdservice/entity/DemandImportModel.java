@@ -6,13 +6,13 @@ import cn.afterturn.easypoi.handler.inter.IExcelModel;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import java.util.Date;
 
 
 @Data
 public class DemandImportModel  implements IExcelModel {
 
-    @Excel(name = "租客名称", isImportField = "true")
+    @Excel(name = "客户名称", isImportField = "true")
     @NotBlank(message = "租客名称不能为空")
     private String name;
 
@@ -61,8 +61,8 @@ public class DemandImportModel  implements IExcelModel {
     /**
      * 首次来访时间
      */
-    @Excel(name = "首次来访时间" , importFormat = "yyyy-MM-dd", isImportField = "true")
-    private LocalDate firstVisitDate;
+    @Excel(name = "首次来访时间" , importFormat = "yyyy/MM/dd", isImportField = "true")
+    private Date firstVisitDate;
 
     @Excel(name = "带看房源")
     private String resourceName;
