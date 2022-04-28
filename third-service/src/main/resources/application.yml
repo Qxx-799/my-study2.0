@@ -3,3 +3,11 @@ server:
 spring:
   main:
     allow-bean-definition-overriding: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: qxx
+    password: 123456
+    listener:
+      simple:
+        acknowledge-mode: manual # 选择手动ack
